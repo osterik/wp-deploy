@@ -1,11 +1,17 @@
 #!/bin/bash
 set -eu
 
-## Load a wordpress dumped db
+## Load a wordpress dumped db, obtain credentials from wp-config.php
 ## Used in maintaining a development and production environment for Wordpress
 ## deployments
 ## Author Andy O'Neill <oneill@energyhub.net>
 
+if [ ! -e wp-config.php ]; then
+    echo "wp-config.php not found"
+    echo "Run from your wordpress directory"
+    echo "Usage dumpdb"
+    exit 1
+fi
 
 DB_DUMP=db/dump.sql
 
@@ -13,7 +19,7 @@ DB_DUMP=db/dump.sql
 DUMP_DB_NAME=$(grep "CREATE DATABASE" $DB_DUMP | awk -F '`' '{print $2}')
 # Get the parameters of the db to load into from wp_config.php
 DB_NAME=$(      grep DB_NAME        wp-config.php  | awk -F "'" '{print $4}')
-DB_USER=$(    	grep DB_USER 	    wp-config.php  | awk -F "'" '{print $4}')
+DB_USER=$(      grep DB_USER        wp-config.php  | awk -F "'" '{print $4}')
 DB_PASSWORD=$(  grep DB_PASSWORD    wp-config.php  | awk -F "'" '{print $4}')
 DB_HOST=$(      grep DB_HOST        wp-config.php  | awk -F "'" '{print $4}' |  awk -F ":" '{print $1}' )
 DB_PORT=$(      grep DB_HOST        wp-config.php  | awk -F "'" '{print $4}' |  awk -F ":" '{print $2}' )
@@ -27,11 +33,11 @@ echo "DB_PORT=[$DB_PORT]"
 DATE=$(date +%Y-%m-%d-%H%M)
 BACKUP_FILE=db/$DB_NAME.${DATE}.sql
 
-if [ ! -e $DB_DUMP ]; then
-	echo "DB to load file not found: $DB_DUMP"
-	echo "Run from your wordpress directory"
-	echo "Usage loaddb"
-	exit 1
+if [ ! -e "$DB_DUMP" ]; then
+    echo "DB file to load not found: $DB_DUMP"
+    echo "Run from your wordpress directory"
+    echo "Usage loaddb"
+    exit 1
 fi
 
 echo "Loading from $DB_DUMP to $DB_NAME."

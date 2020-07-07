@@ -1,7 +1,7 @@
 #!/bin/bash
 set -eu
 
-## Dump a wordpress db automatically
+## Dump a wordpress db automatically, obtain credentials from wp-config.php
 ## Used in maintaining a development and production environment for Wordpress
 ## deployments
 ## Author Andy O'Neill <oneill@energyhub.net>
@@ -9,14 +9,14 @@ set -eu
 DUMP_FILE=db/dump.sql
 
 if [ ! -e wp-config.php ]; then
-	echo "wp-config.php not found"
-	echo "Run from your wordpress directory"
-	echo "Usage dumpdb"
-	exit 1
+    echo "wp-config.php not found"
+    echo "Run from your wordpress directory"
+    echo "Usage dumpdb"
+    exit 1
 fi
 # Get the parameters of the db to dump from wp_config.php
 DB_NAME=$(      grep DB_NAME        wp-config.php  | awk -F "'" '{print $4}')
-DB_USER=$(    	grep DB_USER 	    wp-config.php  | awk -F "'" '{print $4}')
+DB_USER=$(      grep DB_USER        wp-config.php  | awk -F "'" '{print $4}')
 DB_PASSWORD=$(  grep DB_PASSWORD    wp-config.php  | awk -F "'" '{print $4}')
 DB_HOST=$(      grep DB_HOST        wp-config.php  | awk -F "'" '{print $4}' |  awk -F ":" '{print $1}' )
 DB_PORT=$(      grep DB_HOST        wp-config.php  | awk -F "'" '{print $4}' |  awk -F ":" '{print $2}' )
