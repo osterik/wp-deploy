@@ -2,11 +2,10 @@
 set -eu
 
 ## Dump a wordpress db automatically, obtain credentials from wp-config.php
+## if DB_TABLE environment variable set = dump only this table
 ## Used in maintaining a development and production environment for Wordpress
 ## deployments
 ## Author Andy O'Neill <oneill@energyhub.net>
-
-DUMP_FILE=db/dump.sql
 
 if [ ! -e wp-config.php ]; then
     echo "wp-config.php not found"
@@ -28,9 +27,18 @@ echo "DB_PORT=[$DB_PORT]"
 #TODO add check for port presence
 
 mkdir -p db
-
-echo "Dumping $DB_NAME to $DUMP_FILE"
-mysqldump --opt -u$DB_USER -p$DB_PASSWORD --host $DB_HOST --port $DB_PORT --databases $DB_NAME > $DUMP_FILE
-
-echo "Dumped $DB_NAME to $DUMP_FILE"
+#if DB_TABLE set => dump only this table
+DB_TABLE=${DB_TABLE:-all}
+if [[ "$DB_TABLE" == "all" ]]; then
+    DUMP_FILE=db/dump.sql
+    echo "Dumping $DB_NAME to $DUMP_FILE"
+    mysqldump --opt -u"$DB_USER" -p"$DB_PASSWORD" --host "$DB_HOST" --port "$DB_PORT" --databases "$DB_NAME" > "$DUMP_FILE"
+    echo "Dumped $DB_NAME to $DUMP_FILE successfully"
+else
+    echo "DB_TABLE=[$DB_TABLE]"
+    DUMP_FILE=db/dump-$DB_TABLE.sql
+    echo "Dumping $DB_NAME.$DB_TABLE to $DUMP_FILE"
+    mysqldump --opt -u"$DB_USER" -p"$DB_PASSWORD" --host "$DB_HOST" --port "$DB_PORT" "$DB_NAME" "$DB_TABLE"   > "$DUMP_FILE"
+    echo "Dumped $DB_NAME.$DB_TABLE to $DUMP_FILE successfully"
+fi
 
