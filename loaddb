@@ -55,7 +55,7 @@ if [[ "$DB_TABLE" == "all" ]]; then
     mysqldump --opt -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USER" -p"$DB_PASSWORD" --databases "$DB_NAME" > "$BACKUP_FILE"
 
     echo "Loading dump into $DB_NAME"
-    sed -i "s/$DUMP_DB_NAME/$DB_NAME/" $DB_DUMP \
+    sed "s/$DUMP_DB_NAME/$DB_NAME/" $DB_DUMP \
         | mysql -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USER" -p"$DB_PASSWORD" "$DB_NAME"
     echo "Loaded dump into $DB_NAME OK!"
 else
