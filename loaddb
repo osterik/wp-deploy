@@ -7,6 +7,15 @@ set -eu
 ## deployments
 ## Author Andy O'Neill <oneill@energyhub.net>
 
+function check_dump_file {
+    if [ ! -e "$DB_DUMP" ]; then
+        echo "DB file to load not found: $DB_DUMP"
+        echo "Run from your wordpress directory"
+        echo "Usage loaddb"
+        exit 1
+    fi
+}
+
 if [ ! -e wp-config.php ]; then
     echo "wp-config.php not found"
     echo "Run from your wordpress directory"
@@ -14,8 +23,6 @@ if [ ! -e wp-config.php ]; then
     exit 1
 fi
 
-# Get the name of the database that was dumped
-DUMP_DB_NAME=$(grep "CREATE DATABASE" "$DB_DUMP" | awk -F '`' '{print $2}')
 # Get the parameters of the db to load into from wp_config.php
 DB_NAME=$(      grep DB_NAME        wp-config.php  | awk -F "'" '{print $4}')
 DB_USER=$(      grep DB_USER        wp-config.php  | awk -F "'" '{print $4}')
@@ -32,17 +39,15 @@ echo "DB_PORT=[$DB_PORT]"
 DATE=$(date +%Y-%m-%d-%H%M)
 BACKUP_FILE=db/$DB_NAME.${DATE}.sql
 
-if [ ! -e "$DB_DUMP" ]; then
-    echo "DB file to load not found: $DB_DUMP"
-    echo "Run from your wordpress directory"
-    echo "Usage loaddb"
-    exit 1
-fi
+
 
 #if DB_TABLE set => load only this table
 DB_TABLE=${DB_TABLE:-all}
 if [[ "$DB_TABLE" == "all" ]]; then
     DB_DUMP=db/dump.sql
+    # Get the name of the database that was dumped
+    DUMP_DB_NAME=$(grep "CREATE DATABASE" "$DB_DUMP" | awk -F '`' '{print $2}')
+    check_dump_file
     echo "Loading from $DB_DUMP to $DB_NAME."
     echo "Replacing database name in dump $DUMP_DB_NAME to $DB_NAME."
 
@@ -55,6 +60,7 @@ if [[ "$DB_TABLE" == "all" ]]; then
     echo "Loaded dump into $DB_NAME OK!"
 else
     DB_DUMP=db/dump-$DB_TABLE.sql
+    check_dump_file
     echo "Loading from $DB_DUMP to $DB_NAME.$DB_TABLE"
 
     echo "Making backup of $DB_NAME.$DB_TABLE to $BACKUP_FILE"
