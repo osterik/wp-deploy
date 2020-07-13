@@ -37,9 +37,6 @@ echo "DB_PORT=[$DB_PORT]"
 #TODO add check for port presence
 
 DATE=$(date +%Y-%m-%d-%H%M)
-BACKUP_FILE=db/$DB_NAME.${DATE}.sql
-
-
 
 #if DB_TABLE set => load only this table
 DB_TABLE=${DB_TABLE:-all}
@@ -51,6 +48,7 @@ if [[ "$DB_TABLE" == "all" ]]; then
     echo "Loading from $DB_DUMP to $DB_NAME."
     echo "Replacing database name in dump $DUMP_DB_NAME to $DB_NAME."
 
+    BACKUP_FILE=db/$DB_NAME.${DATE}.sql
     echo "Making backup of $DB_NAME to $BACKUP_FILE"
     mysqldump --opt -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USER" -p"$DB_PASSWORD" --databases "$DB_NAME" > "$BACKUP_FILE"
 
@@ -63,6 +61,7 @@ else
     check_dump_file
     echo "Loading from $DB_DUMP to $DB_NAME.$DB_TABLE"
 
+    BACKUP_FILE=db/$DB_NAME-$DB_TABLE.${DATE}.sql
     echo "Making backup of $DB_NAME.$DB_TABLE to $BACKUP_FILE"
     mysqldump --opt -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USER" -p"$DB_PASSWORD" "$DB_NAME" "$DB_TABLE"> "$BACKUP_FILE"
 
