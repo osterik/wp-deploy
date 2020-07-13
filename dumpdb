@@ -38,6 +38,6 @@ else
     echo "DB_TABLE=[$DB_TABLE]"
     DUMP_FILE=db/dump-$DB_TABLE.sql
     echo "Dumping $DB_NAME.$DB_TABLE to $DUMP_FILE"
-    mysqldump --opt -u"$DB_USER" -p"$DB_PASSWORD" --host "$DB_HOST" --port "$DB_PORT" "$DB_NAME" "$DB_TABLE"   > "$DUMP_FILE"
+    mysqldump --opt -u"$DB_USER" -p"$DB_PASSWORD" --host "$DB_HOST" --port "$DB_PORT" "$DB_NAME" "$DB_TABLE" --extended-insert=FALSE > "$DUMP_FILE"
     echo "Dumped $DB_NAME.$DB_TABLE to $DUMP_FILE successfully"
 fi
